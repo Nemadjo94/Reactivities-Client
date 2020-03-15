@@ -15,8 +15,18 @@ class ActivityStore {
 
   // Sort activities by date
   @computed get activitiesByDate() {
-    return Array.from(this.activityRegistry.values())
-      .sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
+    return this.groupActivitiesByDate(Array.from(this.activityRegistry.values()));
+  }
+
+  groupActivitiesByDate(activities: IActivity[]){
+    const sortedActivities = activities.sort(
+      (a, b) => Date.parse(a.date) - Date.parse(b.date)
+    )
+    return Object.entries(sortedActivities.reduce((activities, activity) => { // Separate activities by the date
+      const date = activity.date.split('T')[0]; // split it by date
+      activities[date] = activities[date] ? [...activities[date], activity] : [activity];
+      return activities;
+    }, {} as {[key: string]: IActivity[]}));
   }
 
   // action to load our activities from api
